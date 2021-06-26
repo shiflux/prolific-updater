@@ -7,11 +7,13 @@ import os
 from plyer import notification  # for getting notification on your PC
 import webbrowser
 import argparse
+import json
 
 class ProlificUpdater:
-    def __init__(self, bearer):
+    def __init__(self, bearer, participantId):
         self.bearer = bearer
         self.oldResults = list()
+        self.participantId = participantId
 
     def getRequestFromProlific(self):
         url = "https://www.prolific.co/api/v1/studies/?current=1"
@@ -19,8 +21,14 @@ class ProlificUpdater:
         headers["Accept"] = "application/json"
         headers["Authorization"] = self.bearer
         return requests.get(url, headers=headers)
-            
 
+    def reservePlace(self, id):
+        url = "https://www.prolific.co/api/v1/submissions/reserve/"
+        headers = CaseInsensitiveDict()
+        headers["Accept"] = "application/json"
+        headers["Authorization"] = self.bearer
+        postObj = {"study_id": id, "participant_id": self.participantId}
+        return requests.post(url, headers=headers, data = postObj)
 
     def getResultsFromProlific(self):
         try:
@@ -75,6 +83,7 @@ class ProlificUpdater:
         results = self.getResultsFromProlific()
         if results:
             if results != self.oldResults:
+                self.reservePlace(results[0]["id"])
                 notification.notify(
                     # title of the notification,
                     title="Prolific update {}".format(datetime.now().strftime("%H:%M:%S")),
@@ -89,7 +98,7 @@ class ProlificUpdater:
                 )
                 a_website = "https://app.prolific.co/studies"  # TODO: open url in results
                 webbrowser.open_new_tab(a_website)
-            self.saveToFile("".join(results))
+            self.saveToFile(json.dumps(results))
         
         self.oldResults = results
         
@@ -98,13 +107,16 @@ class ProlificUpdater:
         else:
             return False
 
-def parseBearer():
+def parseArgs():
     parser = argparse.ArgumentParser(description='Keep updated with Prolific')
     parser.add_argument('-b', '--bearer', type=str, help='bearer token')
+    parser.add_argument('-i', '--id', type=str, help='participant id')
     args = parser.parse_args()
-    return "Bearer " + args.bearer
+    return {"bearer": "Bearer " + args.bearer, "id": args.id}
 
-p_updater = ProlificUpdater(parseBearer())
+myArguments = parseArgs()
+
+p_updater = ProlificUpdater(bearer=myArguments["bearer"], participantId=myArguments["id"])
 
 while (True):
     updateTime = 5
