@@ -16,14 +16,14 @@ class ProlificUpdater:
         self.participantId = participantId
 
     def getRequestFromProlific(self):
-        url = "https://www.prolific.co/api/v1/studies/?current=1"
+        url = "https://internal-api.prolific.co/api/v1/studies/?current=1"
         headers = CaseInsensitiveDict()
-        headers["Accept"] = "application/json"
+        headers["Accept"] = "application/json, text/plain, */*"
         headers["Authorization"] = self.bearer
         return requests.get(url, headers=headers)
 
     def reservePlace(self, id):
-        url = "https://www.prolific.co/api/v1/submissions/reserve/"
+        url = "https://internal-api.prolific.co/api/v1/submissions/reserve/"
         headers = CaseInsensitiveDict()
         headers["Accept"] = "application/json"
         headers["Authorization"] = self.bearer
@@ -52,6 +52,7 @@ class ProlificUpdater:
             return response.json()['results']
         else:
             print("Response error {}".format(response.status_code))
+            print("Response error {}".format(response.reason))
             notification.notify(
                 # title of the notification,
                 title="Prolific update error {}".format(datetime.now().strftime("%H:%M:%S")),
