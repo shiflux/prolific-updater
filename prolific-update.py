@@ -16,14 +16,14 @@ class ProlificUpdater:
         self.participantId = participantId
 
     def getRequestFromProlific(self):
-        url = "https://internal-api.prolific.co/api/v1/studies/?current=1"
+        url = "https://internal-api.prolific.com/api/v1/studies/?current=1"
         headers = CaseInsensitiveDict()
         headers["Accept"] = "application/json, text/plain, */*"
         headers["Authorization"] = self.bearer
         return requests.get(url, headers=headers)
 
     def reservePlace(self, id):
-        url = "https://internal-api.prolific.co/api/v1/submissions/reserve/"
+        url = "https://internal-api.prolific.com/api/v1/submissions/reserve/"
         headers = CaseInsensitiveDict()
         headers["Accept"] = "application/json"
         headers["Authorization"] = self.bearer
@@ -97,7 +97,7 @@ class ProlificUpdater:
                     # the notification stays for 50sec
                     timeout=50
                 )
-                a_website = "https://app.prolific.co/studies"  # TODO: open url in results
+                a_website = "https://app.prolific.com/studies"  # TODO: open url in results
                 webbrowser.open_new_tab(a_website)
             self.saveToFile(json.dumps(results))
         
